@@ -78,7 +78,8 @@ def estimate_head_pose(subject, min_confidence, pitch_neutral_ratio):
     ratio = (float(xy[NOSE, 0]) - mid_x) / (span / 2.0)
     yaw = float(np.clip(ratio, -1.0, 1.0)) * 90.0
 
-    # pitch: 両目があれば鼻の縦オフセットから近似
+    # pitch: 両目があれば鼻の縦オフセットから近似。
+    # 両耳だけ見えて両目が無いと pitch は 0 固定になる（俯き判定は yaw 側で吸収される想定）。
     if ok(L_EYE) and ok(R_EYE):
         eye_mid_y = (float(xy[L_EYE, 1]) + float(xy[R_EYE, 1])) / 2.0
         pitch_ratio = (float(xy[NOSE, 1]) - eye_mid_y) / span
@@ -94,6 +95,8 @@ def classify(subject_present, head_pose, yaw_threshold, pitch_threshold):
     if not subject_present:
         return Status.AWAY
     if head_pose is None:
+        # 在席だが顔の向きが取れない（＝後ろ向き等）は意図的に DISTRACTED 扱い。
+        # 仕様書 §5.3 の「推定不能→AWAY」を実装プラン(主被写体=最大の人物)で上書きした判断。
         return Status.DISTRACTED
     if abs(head_pose.yaw) <= yaw_threshold and abs(head_pose.pitch) <= pitch_threshold:
         return Status.FOCUSED
