@@ -18,7 +18,7 @@ class Pipeline:
         keypoints = self._detector.detect(frame)
 
         primary = select_primary(
-            keypoints.xy, keypoints.confidence, cfg.keypoint_confidence_min
+            keypoints.xy, keypoints.keypoint_confidence, cfg.keypoint_confidence_min
         )
         if primary is not None:
             head_pose = estimate_head_pose(
