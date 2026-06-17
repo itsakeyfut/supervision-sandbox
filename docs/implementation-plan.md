@@ -431,7 +431,7 @@ def test_head_pose_pitch_down():
         l_ear=(-50, 0, 0.9), r_ear=(50, 0, 0.9),
     )
     pose = estimate_head_pose(subj, 0.5, pitch_neutral_ratio=0.5)
-    assert pose.pitch == 27.0
+    assert abs(pose.pitch - 27.0) < 1e-6  # (0.8-0.5)*90、浮動小数なので許容誤差で比較
 ```
 
 - [ ] **Step 2: テストが失敗することを確認**
