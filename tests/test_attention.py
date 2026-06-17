@@ -1,6 +1,7 @@
 import numpy as np
 
-from attention_monitor.attention import select_primary, PrimarySubject, estimate_head_pose, HeadPose
+from attention_monitor.attention import select_primary, PrimarySubject, estimate_head_pose, HeadPose, classify
+from attention_monitor.status import Status
 
 
 def _person(points):
@@ -84,3 +85,26 @@ def test_head_pose_pitch_down():
     )
     pose = estimate_head_pose(subj, 0.5, pitch_neutral_ratio=0.5)
     assert abs(pose.pitch - 27.0) < 1e-6  # (0.8-0.5)*90、浮動小数なので許容誤差で比較
+
+
+def test_classify_away_when_absent():
+    assert classify(False, None, 20.0, 20.0) is Status.AWAY
+
+
+def test_classify_distracted_when_present_but_no_pose():
+    assert classify(True, None, 20.0, 20.0) is Status.DISTRACTED
+
+
+def test_classify_focused_when_centered():
+    pose = HeadPose(yaw=5.0, pitch=-3.0)
+    assert classify(True, pose, 20.0, 20.0) is Status.FOCUSED
+
+
+def test_classify_distracted_when_yaw_exceeds():
+    pose = HeadPose(yaw=45.0, pitch=0.0)
+    assert classify(True, pose, 20.0, 20.0) is Status.DISTRACTED
+
+
+def test_classify_distracted_when_pitch_exceeds():
+    pose = HeadPose(yaw=0.0, pitch=27.0)
+    assert classify(True, pose, 20.0, 20.0) is Status.DISTRACTED

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from attention_monitor.status import Status
+
 # COCO keypoint indices
 NOSE = 0
 L_EYE = 1
@@ -85,3 +87,14 @@ def estimate_head_pose(subject, min_confidence, pitch_neutral_ratio):
         pitch = 0.0
 
     return HeadPose(yaw=yaw, pitch=float(pitch))
+
+
+def classify(subject_present, head_pose, yaw_threshold, pitch_threshold):
+    """在席フラグと頭の向きからステータスを決める（生判定）。"""
+    if not subject_present:
+        return Status.AWAY
+    if head_pose is None:
+        return Status.DISTRACTED
+    if abs(head_pose.yaw) <= yaw_threshold and abs(head_pose.pitch) <= pitch_threshold:
+        return Status.FOCUSED
+    return Status.DISTRACTED
