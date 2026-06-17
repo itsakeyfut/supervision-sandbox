@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# uv / venv
+.venv/
+
+# model weights
+*.pt
+
+# OS
+.DS_Store
