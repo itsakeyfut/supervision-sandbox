@@ -8,6 +8,7 @@ dependencies = [
     "supervision>=0.29.0",
     "opencv-python>=4.13.0.92",
     "numpy>=2.4.6",
+    "pyside6>=6.11.1",
 ]
 
 [project.scripts]
