@@ -25,8 +25,8 @@ class Renderer:
     def draw(self, frame, keypoints, primary, raw, committed, stats, fps):
         out = frame.copy()
 
-        # スケルトン（検出があれば）
-        if keypoints is not None and len(keypoints) > 0:
+        # スケルトン（既定オフ。config で有効化した時のみ、検出があれば描画）
+        if self._config.show_pose_overlay and keypoints is not None and len(keypoints) > 0:
             out = self._edge.annotate(out, keypoints)
             out = self._vertex.annotate(out, keypoints)
 

@@ -11,3 +11,4 @@ class Config:
     commit_seconds: float = 0.7             # ステータス確定までの継続秒数
     keypoint_confidence_min: float = 0.5    # これ未満のキーポイントは欠損扱い
     window_name: str = "Attention Monitor"
+    show_pose_overlay: bool = False         # True で骨格(キーポイント/辺)を重畳表示。既定オフ（デバッグ用）
