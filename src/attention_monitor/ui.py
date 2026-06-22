@@ -3,8 +3,9 @@ from __future__ import annotations
 import time
 
 import cv2
-from PySide6.QtCore import QThread, Signal
-from PySide6.QtGui import QImage
+from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QAction, QImage, QKeySequence, QPixmap
+from PySide6.QtWidgets import QLabel, QMainWindow, QMessageBox
 
 from attention_monitor.capture import WebcamSource
 from attention_monitor.pipeline import Pipeline
@@ -61,3 +62,58 @@ class CaptureThread(QThread):
                 self.frameReady.emit(frame_to_qimage(out))
         finally:
             source.release()
+
+
+class MainWindow(QMainWindow):
+    """メニューバー・映像表示・安全終了を担う。"""
+
+    def __init__(self, config):
+        super().__init__()
+        self._config = config
+        self._shutdown_done = False
+        self.setWindowTitle(config.window_name)
+
+        self._label = QLabel()
+        self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._label.setMinimumSize(640, 480)
+        self.setCentralWidget(self._label)
+
+        self._build_menu()
+
+        self._thread = CaptureThread(config)
+        self._thread.frameReady.connect(self._on_frame)
+        self._thread.error.connect(self._on_error)
+
+    def _build_menu(self):
+        file_menu = self.menuBar().addMenu("ファイル(&F)")
+        quit_action = QAction("終了(&Q)", self)
+        quit_action.setShortcut(QKeySequence("Ctrl+Q"))
+        quit_action.triggered.connect(self.close)
+        file_menu.addAction(quit_action)
+
+    def start_capture(self):
+        self._thread.start()
+
+    def _on_frame(self, image):
+        pixmap = QPixmap.fromImage(image)
+        scaled = pixmap.scaled(
+            self._label.size(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        self._label.setPixmap(scaled)
+
+    def _on_error(self, message):
+        QMessageBox.critical(
+            self, "エラー", f"カメラまたはモデルの初期化に失敗しました:\n{message}"
+        )
+        self.close()
+
+    def closeEvent(self, event):
+        if not self._shutdown_done:
+            self._shutdown_done = True
+            self._thread.stop()
+            self._thread.wait()
+            if self._thread.pipeline is not None:
+                print(self._thread.pipeline.stats.summary())
+        event.accept()
