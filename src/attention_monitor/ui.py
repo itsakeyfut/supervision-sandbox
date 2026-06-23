@@ -101,11 +101,20 @@ class MainWindow(QMainWindow):
         calibrate_action.triggered.connect(self._request_calibration)
         adjust_menu.addAction(calibrate_action)
 
+        overlay_action = QAction("骨格を表示(&S)", self)
+        overlay_action.setCheckable(True)
+        overlay_action.setChecked(self._config.show_pose_overlay)
+        overlay_action.toggled.connect(self._toggle_pose_overlay)
+        adjust_menu.addAction(overlay_action)
+
     def start_capture(self):
         self._thread.start()
 
     def _request_calibration(self):
         self._thread.request_calibration()
+
+    def _toggle_pose_overlay(self, checked):
+        self._config.show_pose_overlay = checked
 
     def _on_frame(self, image):
         pixmap = QPixmap.fromImage(image)
