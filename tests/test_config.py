@@ -12,6 +12,7 @@ def test_config_defaults():
     assert cfg.model_path == "yolo11s-pose.pt"
     assert cfg.yaw_center_threshold == 25.0
     assert cfg.pitch_center_threshold == 20.0
+    assert cfg.gaze_threshold == 0.3
     assert cfg.commit_seconds == 0.7
     assert cfg.keypoint_confidence_min == 0.5
     assert cfg.window_name == "Attention Monitor"

@@ -1,6 +1,7 @@
 import numpy as np
 
 from attention_monitor.attention import select_primary, PrimarySubject, HeadPose, classify
+from attention_monitor.gaze import GazeOffset
 from attention_monitor.status import Status
 
 
@@ -57,3 +58,18 @@ def test_classify_distracted_when_yaw_exceeds():
 def test_classify_distracted_when_pitch_exceeds():
     pose = HeadPose(yaw=0.0, pitch=27.0)
     assert classify(True, pose, 20.0, 20.0) is Status.DISTRACTED
+
+
+def test_classify_focused_with_gaze_within():
+    pose = HeadPose(5.0, -3.0)
+    assert classify(True, pose, 20.0, 20.0, GazeOffset(0.1, 0.05), 0.3) is Status.FOCUSED
+
+
+def test_classify_distracted_when_gaze_exceeds():
+    pose = HeadPose(5.0, -3.0)
+    assert classify(True, pose, 20.0, 20.0, GazeOffset(0.5, 0.0), 0.3) is Status.DISTRACTED
+
+
+def test_classify_gaze_optional_backward_compat():
+    pose = HeadPose(5.0, -3.0)
+    assert classify(True, pose, 20.0, 20.0) is Status.FOCUSED
