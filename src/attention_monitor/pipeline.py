@@ -25,6 +25,10 @@ class Pipeline:
     def request_calibration(self):
         self._tracker.request_calibration()
 
+    def apply_settings(self):
+        self._tracker.set_ema_alpha(self._config.ema_alpha)
+        self.state.commit_seconds = self._config.commit_seconds
+
     def process(self, frame, dt, fps):
         cfg = self._config
         self._ts_ms += max(1, round(dt * 1000))

@@ -14,6 +14,9 @@ class _Tracker2D:
     def request_calibration(self):
         self._calibrate_pending = True
 
+    def set_alpha(self, alpha):
+        self._alpha = alpha
+
     def update(self, value):
         if value is None:
             self._smoothed = None
@@ -42,6 +45,10 @@ class AttentionTracker:
     def request_calibration(self):
         self._head.request_calibration()
         self._gaze.request_calibration()
+
+    def set_ema_alpha(self, alpha):
+        self._head.set_alpha(alpha)
+        self._gaze.set_alpha(alpha)
 
     def update(self, head_pose, gaze):
         head_in = None if head_pose is None else (head_pose.yaw, head_pose.pitch)
