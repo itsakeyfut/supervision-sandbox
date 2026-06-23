@@ -7,7 +7,6 @@ class Config:
     model_path: str = "yolo11s-pose.pt"
     yaw_center_threshold: float = 25.0      # |yaw-基準| <= これなら正面とみなす（度）
     pitch_center_threshold: float = 20.0    # |pitch-基準| <= これなら水平とみなす（度）
-    pitch_neutral_ratio: float = 0.5        # （旧ヒューリスティック用・Task7で削除予定）
     commit_seconds: float = 0.7             # ステータス確定までの継続秒数
     keypoint_confidence_min: float = 0.5    # これ未満のキーポイントは欠損扱い
     window_name: str = "Attention Monitor"

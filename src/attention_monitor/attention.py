@@ -51,45 +51,6 @@ def select_primary(xy, confidence, min_confidence):
     return PrimarySubject(best_index, xy[best_index], confidence[best_index])
 
 
-def estimate_head_pose(subject, min_confidence, pitch_neutral_ratio):
-    """主被写体の顔キーポイントから頭の向き(yaw/pitch)を近似。推定不能なら None。"""
-    xy = subject.xy
-    conf = subject.confidence
-
-    def ok(i):
-        return conf[i] >= min_confidence
-
-    if not ok(NOSE):
-        return None
-
-    # yaw: 両耳優先、なければ両目
-    if ok(L_EAR) and ok(R_EAR):
-        left_x, right_x = float(xy[L_EAR, 0]), float(xy[R_EAR, 0])
-    elif ok(L_EYE) and ok(R_EYE):
-        left_x, right_x = float(xy[L_EYE, 0]), float(xy[R_EYE, 0])
-    else:
-        return None
-
-    span = abs(right_x - left_x)
-    if span < 1e-6:
-        return None
-
-    mid_x = (left_x + right_x) / 2.0
-    ratio = (float(xy[NOSE, 0]) - mid_x) / (span / 2.0)
-    yaw = float(np.clip(ratio, -1.0, 1.0)) * 90.0
-
-    # pitch: 両目があれば鼻の縦オフセットから近似。
-    # 両耳だけ見えて両目が無いと pitch は 0 固定になる（俯き判定は yaw 側で吸収される想定）。
-    if ok(L_EYE) and ok(R_EYE):
-        eye_mid_y = (float(xy[L_EYE, 1]) + float(xy[R_EYE, 1])) / 2.0
-        pitch_ratio = (float(xy[NOSE, 1]) - eye_mid_y) / span
-        pitch = (pitch_ratio - pitch_neutral_ratio) * 90.0
-    else:
-        pitch = 0.0
-
-    return HeadPose(yaw=yaw, pitch=float(pitch))
-
-
 def classify(subject_present, head_pose, yaw_threshold, pitch_threshold):
     """在席フラグと頭の向きからステータスを決める（生判定）。"""
     if not subject_present:
