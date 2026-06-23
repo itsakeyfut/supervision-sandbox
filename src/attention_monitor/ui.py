@@ -35,6 +35,10 @@ class CaptureThread(QThread):
     def stop(self):
         self._running = False
 
+    def request_calibration(self):
+        if self.pipeline is not None:
+            self.pipeline.request_calibration()
+
     def run(self):
         source = None
         try:
@@ -91,8 +95,17 @@ class MainWindow(QMainWindow):
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
 
+        adjust_menu = self.menuBar().addMenu("調整(&A)")
+        calibrate_action = QAction("基準を設定(&C)", self)
+        calibrate_action.setShortcut(QKeySequence("Ctrl+R"))
+        calibrate_action.triggered.connect(self._request_calibration)
+        adjust_menu.addAction(calibrate_action)
+
     def start_capture(self):
         self._thread.start()
+
+    def _request_calibration(self):
+        self._thread.request_calibration()
 
     def _on_frame(self, image):
         pixmap = QPixmap.fromImage(image)
