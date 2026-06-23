@@ -39,6 +39,10 @@ class CaptureThread(QThread):
         if self.pipeline is not None:
             self.pipeline.request_calibration()
 
+    def apply_settings(self):
+        if self.pipeline is not None:
+            self.pipeline.apply_settings()
+
     def run(self):
         source = None
         try:
