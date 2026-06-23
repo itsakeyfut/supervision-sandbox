@@ -51,14 +51,21 @@ def select_primary(xy, confidence, min_confidence):
     return PrimarySubject(best_index, xy[best_index], confidence[best_index])
 
 
-def classify(subject_present, head_pose, yaw_threshold, pitch_threshold):
-    """在席フラグと頭の向きからステータスを決める（生判定）。"""
+def classify(subject_present, head_pose, yaw_threshold, pitch_threshold,
+             gaze=None, gaze_threshold=None):
+    """在席・頭の向き・（任意で）視線からステータスを決める（生判定）。"""
     if not subject_present:
         return Status.AWAY
     if head_pose is None:
         # 在席だが顔の向きが取れない（＝後ろ向き等）は意図的に DISTRACTED 扱い。
-        # 仕様書 §5.3 の「推定不能→AWAY」を実装プラン(主被写体=最大の人物)で上書きした判断。
         return Status.DISTRACTED
-    if abs(head_pose.yaw) <= yaw_threshold and abs(head_pose.pitch) <= pitch_threshold:
+    head_ok = (
+        abs(head_pose.yaw) <= yaw_threshold and abs(head_pose.pitch) <= pitch_threshold
+    )
+    if gaze is None or gaze_threshold is None:
+        gaze_ok = True
+    else:
+        gaze_ok = abs(gaze.x) <= gaze_threshold and abs(gaze.y) <= gaze_threshold
+    if head_ok and gaze_ok:
         return Status.FOCUSED
     return Status.DISTRACTED
